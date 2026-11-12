@@ -1,0 +1,34 @@
+# Python / environment
+.venv/
+venv/
+__pycache__/
+*.pyc
+.DS_Store
+.vscode/
+
+# Model weights (download links in README)
+*.pt
+*.pth
+*.pth.tar
+
+# Videos, results and cached detections
+input_videos/
+output_videos/
+output_videos_test/
+uploaded_videos/
+results/
+runs/
+tracker_stubs/
+*.mp4
+*.MP4
+*.avi
+*.mov
+
+# Old copies and leftovers
+main_old_backup.py
+main_before_speedup.py
+main_before_wasb.py
+court_homography/court_homography_old.py
+device.py
+WASB-SBDT/
+_to_delete/
