@@ -2,6 +2,14 @@
 
 Computer vision pipeline that takes a tennis match video and finds the players, the ball, the court and the net. It then detects every **bounce** (IN or OUT), **net hits** and the **average shot speed of each player**, and draws all of it on the video and on an accurate top-down mini court.
 
+## Demo video
+
+[![Watch the demo on YouTube](https://img.youtube.com/vi/pYBIH82ymb0/maxresdefault.jpg)](https://youtu.be/pYBIH82ymb0)
+
+▶️ **Watch the full demo:** https://youtu.be/pYBIH82ymb0
+
+## Screenshot
+
 ![Demo](assets/demo.jpg)
 
 *Green dots = IN on my side, yellow = IN on the other side, red = OUT. The pink line is the detected bottom of the net. Top right is the mini court with every bounce in its real court position.*
