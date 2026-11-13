@@ -1,6 +1,8 @@
 # Tennis Analysis Project
 
-Computer vision pipeline that takes a tennis match video and finds the players, the ball, the court and the net. It then detects every **bounce** (IN or OUT), **net hits** and the **average shot speed of each player**, and draws all of it on the video and on an accurate top-down mini court.
+**Tennis Computer Vision | Ball Tracking | Bounce Detection | Court Mapping | Shot Analysis**
+
+> **Status:** independent prototype, built to explore tennis analytics with computer vision. It is not a production-ready system. See [Project status](#project-status) for what it does well and where it falls short.
 
 ## Demo video
 
@@ -8,11 +10,35 @@ Computer vision pipeline that takes a tennis match video and finds the players, 
 
 ▶️ **Watch the full demo:** https://youtu.be/pYBIH82ymb0
 
+## Main capabilities
+
+- **Ball tracking:** tracks the ball in play with a 3-frame model (WASB) and ignores balls lying on the court
+- **Bounce detection:** finds every bounce, with a one-bounce-per-side rule (POINT OVER on a double bounce)
+- **IN / OUT calls:** checks each bounce against the singles lines in real court meters
+- **Court mapping:** homography from the 4 inner court points, auto-corrected to the real white lines
+- **Net detection:** finds the net tape, posts and bottom from the image, plus net hit detection
+- **Shot analysis:** average shot speed per player
+- **Mini court:** every bounce drawn on a top-down court where it actually landed
+
 ## Screenshot
 
 ![Demo](assets/demo.jpg)
 
 *Green dots = IN on my side, yellow = IN on the other side, red = OUT. The pink line is the detected bottom of the net. Top right is the mini court with every bounce in its real court position.*
+
+## Project status
+
+This is a personal prototype, not a finished product.
+
+**What works well:** on the test videos, the ball is found in 91% of frames (up from about 10% with the YOLO ball model I started with), bounces land in the right spot on the mini court, and the net and court are found even with a tilted corner camera.
+
+**Current limits:**
+- Tested on only a few videos so far, not a large benchmark with ground-truth labels
+- Singles court only (no doubles alleys)
+- Runs offline on a recorded video, not in real time
+- The camera needs to see the 4 inner court points (where the service lines meet the singles sidelines)
+- The WASB ball model uses the authors' pretrained tennis weights. It has not been fine-tuned on this kind of footage yet
+- No shot type classification yet (forehand / backhand / serve)
 
 This project started from [abdullahtarek/tennis_analysis](https://github.com/abdullahtarek/tennis_analysis) and builds a lot on top of it (see [What's new](#whats-new-compared-to-the-original-repo)).
 
