@@ -1,6 +1,8 @@
 from utils import get_video_info, read_frames_at, get_device
 import os
+import sys
 import time
+import argparse
 import pickle
 import cv2
 from trackers import (PlayerTracker,
@@ -53,9 +55,23 @@ def detect_players_and_balls(video_path, player_tracker, ball_tracker):
 
 
 def main():
-    # Read video frames
-    input_video_path = "input_videos/input_video2.mp4"
-    output_video_path = "output_videos_test/input_video2_new_ballweights.avi"
+    # Read video frames (paths can also be given on the command line: python main.py --video ... --output ...)
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--video', default="input_videos/inputVideoTest.mp4")
+    parser.add_argument('--output', default="output_videos_test/PracticeMatch_new_ballweights.avi")
+    args = parser.parse_args()
+    input_video_path = args.video
+    output_video_path = args.output
+    os.makedirs(os.path.dirname(output_video_path) or '.', exist_ok=True)
+
+    # timing of each step, printed at the end
+    timings = {}
+    total_start = time.time()
+    step_start = time.time()
+    def end_step(name):
+        nonlocal step_start
+        timings[name] = time.time() - step_start
+        step_start = time.time()
     fps, frame_count, frame_width, frame_height = get_video_info(input_video_path)
     print(f"Video: {frame_count} frames, {fps:.0f} fps, {frame_width}x{frame_height}, running on: {get_device()}")
 
@@ -73,6 +89,7 @@ def main():
             ball_candidates = pickle.load(f)
     else:
         player_detections, ball_candidates = detect_players_and_balls(input_video_path, player_tracker, ball_tracker)
+    end_step("Load models + detect players and ball")
 
     # keep only the MOVING ball (balls lying on the court are ignored)
     raw_ball_detections, stationary_balls = choose_moving_ball(ball_candidates, fps, frame_height, debug=True)
@@ -101,6 +118,7 @@ def main():
     else:
         print("Court: using the keypoints as they are")
     del net_frames
+    end_step("Court keypoints, net and court fit")
 
     # choosing the 2 players by where they stand on the court (P1 = near, P2 = far)
     player_detections = player_tracker.choose_players_by_court(player_detections, court_homography)
@@ -117,6 +135,7 @@ def main():
     net_hit_frames, net_hits = ball_event_detector.get_net_hits(raw_ball_detections, player_detections,
                                                                 ball_shot_frames, ball_detections, ball_bounces)
 
+    end_step("Choose players, shots, bounces, net hits")
     print("Ball bounce frames:", ball_bounce_frames)
     for b in ball_bounces:
         side_text = 'my side' if b['side'] == constants.MY_SIDE else 'other side'
@@ -142,7 +161,17 @@ def main():
     top_down_court = TopDownCourt(court_homography)
     top_down_court.create_output_video(input_video_path, output_video_path, raw_ball_detections,
                                        player_detections, ball_bounces, net_hits, shots)
+    end_step("Shot speeds + draw output video")
     print("Saved", output_video_path)
+
+    total = time.time() - total_start
+    video_seconds = frame_count / fps if fps else 0
+    print("\n===== Timing =====")
+    for name, seconds in timings.items():
+        print(f"  {name:<40} {seconds:7.1f} s")
+    print(f"  {'TOTAL':<40} {total:7.1f} s  ({total / 60:.1f} min)")
+    if video_seconds:
+        print(f"  Video length: {video_seconds:.0f} s  ->  {total / video_seconds:.1f} s of processing per 1 s of video")
 
 
 if __name__ == "__main__":
